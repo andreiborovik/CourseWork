@@ -7,7 +7,7 @@ using namespace std;
 int main()
 {
 	Defragger def;
-	def.getFileMap();
+	def.getFileMap("G:\\temp.txt");
 	
 	return 0;
 }
