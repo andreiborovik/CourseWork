@@ -2,13 +2,14 @@
 #include "Defragger.h"
 #include <Windows.h>
 #include <iostream>
+#include "Interface.h"
 using namespace std;
 
 int main()
 {
-	Defragger def;
-	//def.getFileMap("G:\\temp.txt");
-	def.getFileVolume();
-	
+	setlocale(LC_ALL, "Russian");
+	Interface inter;
+	inter.Menu();
+	system("pause");
 	return 0;
 }

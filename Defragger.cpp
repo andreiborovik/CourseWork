@@ -34,20 +34,17 @@ void Defragger::getFileMap(LPCTSTR file)
 		OPEN_EXISTING,                       // расположение
 		0,                                   // атрибуты файла
 		NULL);
-	cout << GetLastError() << endl;
 	GetDiskFreeSpace("G:\ ",				 //имя тома
 		&sectorsInCluster,					 //число секторов в кластере
 		&bytesInSector,						 //число байт в секторе
 		&freeClusters,						 //число свободных кластеров
 		&totalClusters);					 //общее число кластеров
-	cout << GetLastError() << endl;
 	sizeFile = GetFileSize(myFile, NULL);
 	out_bufSize = sizeof(RETRIEVAL_POINTERS_BUFFER) + (sizeFile/(sectorsInCluster*bytesInSector)) * sizeof(this->out_buf->Extents);
 	this->out_buf = new RETRIEVAL_POINTERS_BUFFER[out_bufSize];
 	DeviceIoControl(myFile, FSCTL_GET_RETRIEVAL_POINTERS, &input_buf, sizeof(input_buf), this->out_buf, out_bufSize, &last, NULL); //возвращает карту кластеров, занятых файлом
 	this->UseCluster = (sizeFile + (sectorsInCluster * bytesInSector) - 1) / (sectorsInCluster * bytesInSector);
 	this->PrevVCN = out_buf->StartingVcn.QuadPart;
-	cout << GetLastError();
 	CloseHandle(myFile);
 }
 
@@ -79,7 +76,6 @@ PVOLUME_BITMAP_BUFFER Defragger::getFileVolume()
 		sizeBuf = out_buf->BitmapSize.QuadPart - out_buf->StartingLcn.QuadPart + sizeof(VOLUME_BITMAP_BUFFER);
 		out_buf = (PVOLUME_BITMAP_BUFFER)new char[sizeBuf];
 		out_buf->StartingLcn.QuadPart = 0;
-		cout << error << " " << GetLastError() << endl;
 		error = DeviceIoControl(drive, FSCTL_GET_VOLUME_BITMAP, &input_buf, sizeof(input_buf), out_buf, sizeBuf, &bytes, NULL);
 		if (error) //вычисление стартового кластера, куда будет перемещён файл
 		{
@@ -122,6 +118,11 @@ void Defragger::FileMove(LPCSTR FileName)
 	MOVE_FILE_DATA input_buf;
 	DWORD bytes;
 	HANDLE File = CreateFile(FileName, FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
+	if (GetLastError() == ERROR_FILE_NOT_FOUND)
+	{
+		cout << "Error";
+		return;
+	}
 	HANDLE Drive = CreateFile("\\\\.\\G:", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
 	input_buf.FileHandle = File;
 	input_buf.StartingLcn.QuadPart = this->StartLCN;
