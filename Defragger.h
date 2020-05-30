@@ -3,9 +3,11 @@
 #include <Windows.h>
 class Defragger
 {
+	PRETRIEVAL_POINTERS_BUFFER out_buf;
 public:
 	Defragger();
 	~Defragger();
-	void getFileMap(LPCTSTR file);
+	PRETRIEVAL_POINTERS_BUFFER getFileMap(LPCTSTR file);
+	PVOLUME_BITMAP_BUFFER getFileVolume();
 };
 
